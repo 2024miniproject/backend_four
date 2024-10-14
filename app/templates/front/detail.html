@@ -18,6 +18,18 @@
 </head>
 
 <body>
+    <!-- Flash 메시지 출력 -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+
 <!-- 사이드바 -->
 <div class="sidebar">
     <div class="logo">
@@ -82,6 +94,7 @@
     {% else %}
     <!-- 판매 목록 가기 버튼: 작성자일 때 표시 -->
         <button class="buy" onclick="window.location.href='/mydeal_views/mydealsell'">판매 목록 가기</button>
+        <button class="buy" onclick="deletePost()">삭제</button>
     {% endif %}
 
 
@@ -224,6 +237,31 @@
     function nextImage() {
     currentIndex = (currentIndex + 1) % images.length;
     showImage(currentIndex);
+    }
+
+    // 삭제 확인 및 요청 처리
+    function deletePost() {
+        if (confirm('정말 이 게시글을 삭제하시겠습니까?')) {
+            var postId = {{ post.id }};  // 현재 게시글의 ID를 가져옴
+            fetch(`/delete_post/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (response.status === 204) {
+                    // 삭제 성공 시 홈으로 리디렉션
+                    window.location.href = '/home';  // 홈으로 리디렉션
+                } else {
+                    alert('게시글 삭제에 실패했습니다. 다시 시도해 주세요.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('오류가 발생했습니다. 다시 시도해 주세요.');
+            });
+        }
     }
 
 
