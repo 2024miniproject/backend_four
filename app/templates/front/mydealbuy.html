@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>상품 거래 상태 변경</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='mydeal.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bar.css') }}">
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+    <script>
+        function markDepositComplete() {
+            document.getElementById('step2').style.color = 'black'; // 검정색으로 변경
+            alert("입금 완료가 확인되었습니다.");
+
+            const depositButton = document.getElementById('depositButton');
+            depositButton.style.backgroundColor = 'gray';
+            depositButton.disabled = true;
+        }
+
+        function toggleProgressBar(purchaseId) {
+            const progressBar = document.getElementById(`progressBar-${purchaseId}`);
+            progressBar.classList.toggle('hidden');
+        }
+
+
+    </script>
+</head>
+
+<body>
+    <!-- 사이드바 -->
+    <div class="sidebar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+            <button class="plus-button" onclick="location.href='{{ url_for('write_views.write') }}'">+</button>
+        </div>
+        <ul class="menu">
+            <li><a href="#"><span class="icon" onclick="location.href='/home'"><img src="../../static/logologo.png" style="width:52px"></span> Home</a></li>
+            <li><a href="#"><span class="icon" onclick="location.href='/mydeal_views/mydealbuy'"><img src="../../static/logologo.png" style="width:52px"></span> My deal</a></li>
+            <li><a href="#"><span class="icon" onclick="location.href='/information'"><img src="../../static/logologo.png" style="width:52px"></span> Info</a></li>
+            <form action="{{ url_for('auth.logout') }}" method="post" style="display:inline;">
+                <button type="submit" class="logout">LOGOUT</button>
+            </form>
+        </ul>
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="content">
+        <!-- 사용자 정보 -->
+        <div class="user-info">
+            <div style="display: flex; gap:15px; align-items: flex-end;">
+                <img src="../../static/profilepic.png" alt="User Icon" class="user-icon">
+                <p class="user-name">{{session['user_name']}}님</p>
+            </div>
+            <div class="purchase-sale">
+                <button class="purchase-btn" onclick="location.href='/mydeal_views/mydealbuy'">구매</button>
+                <button class="sale-btn" onclick="location.href='/mydeal_views/mydealsell'">판매</button>
+            </div>
+        </div>
+
+        <div class="purchase-list">
+            {% if purchases %}
+            {% for purchase in purchases %}
+            <div class="product-section">
+                <div class="aboutabout">
+                    <h4>{{ purchase.item_name }}</h4>
+                    <p>{{ purchase.description }}</p>
+                    <p>상태: {{ purchase.status.value }}</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="status-btn" id="depositButton" onclick="markDepositComplete()">입금 완료</button>
+                    <button class="status-btn2" onclick="toggleProgressBar('{{ purchase.id }}')">현황 조회</button>
+                </div>
+
+            <!-- 상태 진행 바 -->
+            <div class="progress-bar hidden" id="progressBar-{{ purchase.id }}">
+                <div class="step" {% if purchase.status in ['PAYMENT_COMPLETED', 'SIZE_SELECTED', 'LOCKER_ASSIGNED', 'TRANSACTION_COMPLETED'] %} style="color: black;" {% endif %}>
+                    <p>거래 대기 중</p>
+                </div>
+                <div class="step" {% if purchase.status in ['SIZE_SELECTED', 'LOCKER_ASSIGNED', 'TRANSACTION_COMPLETED'] %} style="color: black;" {% endif %}>
+                    <p>입금 완료</p>
+                </div>
+                <div class="step" {% if purchase.status in ['LOCKER_ASSIGNED', 'TRANSACTION_COMPLETED'] %} style="color: black;" {% endif %}>
+                    <p>사물함 크기 선택 완료</p>
+                </div>
+                <div class="step" {% if purchase.status == 'TRANSACTION_COMPLETED' %} style="color: black;" {% endif %}>
+                    <p>사물함 배치 완료</p>
+                </div>
+                <div class="step" {% if purchase.status == 'TRANSACTION_COMPLETED' %} style="color: black;" {% endif %}>
+                    <p>수령 완료</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>구매 목록이 없습니다.</p>
+        {% endif %}
+
+
+    <script src="{{ url_for('static', filename='mydeal.js') }}"></script>
+</body>
+</html>

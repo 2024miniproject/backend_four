@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>판매글 작성</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='write.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='writebody.css') }}">
+</head>
+
+<body>
+    <div class="writepage"></div>
+    <!-- 사이드바 -->
+        <div class="sidebar">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+                <button class="plus-button" id="addPostButton">+</button>
+            </div>
+            <ul class="menu">
+                <li><a href="#"><span class="icon" onclick="location.href='/home'"><img src="../../static/logologo.png" style="width:52px"></span> Home</a></li>
+                <li><a href="#"><span class="icon" onclick="location.href='/mydeal_views/mydealbuy'"><img src="../../static/logologo.png" style="width:52px"></span> My deal</a></li>
+                <li><a href="#"><span class="icon" onclick="location.href='/information'"><img src="../../static/logologo.png" style="width:52px"></span> Info</a></li>
+                <button class="logout" id="logoutButton">LOGOUT</button>
+            </ul>
+        </div>
+
+    <div class="backbox"></div>
+    <div class="writebox">
+        <!-- 꾸밈 요소 -->
+        <div class="circle1"></div>
+        <div class="circle2"></div>
+        <div class="circle3"></div>
+
+        <!-- Form 영역 -->
+        <form id="write-form" action="{{ url_for('write_views.write') }}" method="post" enctype="multipart/form-data">
+            <div class="title">제목</div>
+            <textarea class="titlearea" id="title" name="title" placeholder="제목을 입력하세요!" required></textarea>
+            <hr class="line1">
+
+            <div class="price">가격</div>
+            <textarea class="pricearea" id="price" name="price" placeholder="이번 제품은 얼마인가요?" required></textarea>
+            <hr class="line2">
+
+            <!-- 사진 업로드 부분 -->
+            <label class="upload-box" for="file-upload">
+                <span class="upload-icon">+</span>
+            </label>
+            <input id="file-upload" type="file" name="files"  accept="image/*" onchange="handleFile(event)"  style="display: none;" multiple>
+            <!-- 이미지 미리보기 영역 -->
+            <!-- <script src="{{ url_for('static', filename='pictureupload.js') }}"></script> -->
+
+            <div id="image-container"></div>
+            <div id="rectangle-container"></div>
+
+            <!-- 사진 업로드 스크립트 -->
+
+            <!-- 사용자가 내용을 입력하는 부분 -->
+            <textarea class="textarea" id="content" name="content" placeholder="내용을 입력하세요." rows="1" oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px';" required></textarea>
+
+            <!-- 발행하기 버튼 -->
+            <button class="publish-button" type="button" onclick="publishContent()">발행하기</button>
+
+        </form>
+    </div>
+
+    <script>
+        function handleFile(event) {
+            const output = document.getElementById('image-container');
+
+            Array.from(event.target.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.classList.add('image-preview'); // .image-preview 클래스 추가
+                    output.appendChild(img); // 미리보기 이미지 추가
+                }
+                reader.readAsDataURL(file);  // 각 파일을 Data URL로 읽어오기
+            });
+        }
+
+
+        function publishContent() {
+            event.preventDefault();
+            const content = document.querySelector('.textarea').value;
+            console.log("발행할 내용:", content);
+                    // 서버에 내용 전송하는 로직 추가 가능
+
+            if (confirm("글 작성이 완료되었습니다! 홈으로 이동하시겠습니까?")) {
+            // 확인을 눌렀을 때 홈 페이지로 이동
+            document.querySelector('form').submit();
+            window.location.href = "/home";
+        }
+    }
+    </script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>판매</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='detail.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bar.css') }}">
+
+    <style>
+        /* 구매 신청 완료 시 버튼 색을 회색으로 바꾸는 스타일 */
+        .buy.clicked {
+            background-color: gray;
+            color: white;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+<!-- 사이드바 -->
+<div class="sidebar">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        <button class="plus-button" onclick="location.href='write.html'">+</button>
+    </div>
+    <ul class="menu">
+        <li><a href="#"><span class="icon" onclick="location.href='/home'"><img src="../../static/logologo.png" style="width:52px"></span> Home</a></li>
+            <li><a href="#"><span class="icon" onclick="location.href='/mydeal_views/mydealbuy'"><img src="../../static/logologo.png" style="width:52px"></span> My deal</a></li>
+            <li><a href="#"><span class="icon" onclick="location.href='/information'"><img src="../../static/logologo.png" style="width:52px"></span> Info</a></li>
+    </ul>
+</div>
+
+<div class="imagebox">
+    {% if post.image_filename %}
+    <img class="sim" id="current-image" src="{{ url_for('static', filename=post.image_filename) }}" alt="Uploaded Image"
+         style="max-width: 100%; height: auto;">
+    {% endif %}
+</div>
+
+<div class="imagebutton">
+    <button style="border:none; background-color:#ffffff;" onclick="prevImage()">←</button>
+    <button style="border:none; background-color:#ffffff;" onclick="nextImage()">→</button>
+</div>
+
+<div class="seller">
+    <img class="profilepic" src="../../static/profilepic.png">
+    <img class="sellm" src="X.jpeg">
+</div>
+<div class="sellname">
+    <h3>익명의 뽀삐</h3>
+    <p>최근 답장 - n 시간 전</p>
+</div>
+<div class="boxxx">
+    <h2>{{ post.title }}</h2> <!-- 게시글 제목 -->
+    <p style="margin: 4px;">작성자: {{ post.user.username }}</p>
+    <p style="margin:4px;">가격: {{ post.price|int }}원</p> <!-- 게시글 가격 -->
+    <hr>
+    <!--<div class="divide"></div>-->
+    <div class="sellingpost">
+        <p>{{ post.content }}</p> <!-- 게시글 내용 -->
+    </div>
+
+    <!-- 구매 신청하기 버튼 -->
+    {% if post.user_id != session.get('user_id') %}
+    <button class="buy" onclick="submitPurchase()">구매 신청하기</button>
+    {% else %}
+    <!-- 판매 목록 가기 버튼: 작성자일 때 표시 -->
+        <button class="buy" onclick="window.location.href='/mydeal_views/mydealsell'">판매 목록 가기</button>
+    {% endif %}
+
+
+<!--
+    <h5>답변</h5>
+    <div class="answer-box">
+        {% for answer in answers %}
+        <div class="answercomment">
+            <p>{{ answer.content }}</p>
+            <small>작성자: {{ answer.user.username }}</small> //작성자 이름 표시
+        </div>
+        {% else %}
+        <p>답변이 없습니다.</p>
+        {% endfor %}
+    </div>
+-->
+
+    <div class="comment-box" id="commentBox">
+        <!-- 댓글이 여기에 추가됩니다. -->
+        {% for comment in comments %}
+        <div class="commentcomment">
+            <img src="../../static/profilepic.png" class="commentpic">
+            <div class="text-wrapper">
+                <h3>{{ comment.user.username }}</h3> <!-- 댓글 작성자 이름 -->
+                <p>{{ comment.content }}</p> <!-- 댓글 내용 -->
+                <small>작성일: {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</small> <!-- 작성일 표시 -->
+            </div>
+        </div>
+        {% else %}
+        <p>댓글이 없습니다.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div>
+    <textarea class="commentwrite" id="commentInput" placeholder="댓글을 추가해보세요."></textarea>
+    <button class="writebutton" onclick="submitComment()"><img src="../../static/writepen.png" style="width: 75px; height: 70px;"></button>
+</div>
+
+
+<script>
+
+
+    function submitPurchase() {
+    var button = document.querySelector('.buy');
+    button.classList.add('clicked');
+    button.textContent = '구매 신청 완료';
+    alert("구매 신청이 완료되었습니다. n일까지 0000-0000 계좌로 입금 바랍니다.");
+
+    var postId = {{ post.id }};
+
+    // 여기에서 postId가 제대로 들어오는지 확인하기 위해 로그를 찍습니다.
+    console.log("postId:-----------------------------------------------------", postId);
+
+    fetch('/purchasewant/submit_purchase', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ post_id: postId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '/mydeal_views/mydealbuy'; // 구매 목록 페이지로 이동
+        } else {
+            alert(data.message);
+        }
+    });
+}
+
+
+            function submitComment() {
+                var commentText = document.getElementById('commentInput').value.trim();
+                var postId = {{ post.id }};  // 현재 게시글의 ID를 가져옴
+                if (commentText) {
+                    fetch('/add_comment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ content: commentText, post_id: postId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            document.getElementById('commentInput').value = '';
+                            fetchComments();
+                        } else {
+                            alert("댓글 추가에 실패했습니다.");
+                        }
+                    });
+                } else {
+                    alert("댓글 내용을 입력하세요.");
+                }
+            }
+
+
+            function fetchComments() {
+                var postId = {{ post.id }};  // 현재 게시글의 ID를 가져옴
+                fetch(`/get_comments/${postId}`)
+                    .then(response => response.json())
+                    .then(comments => {
+                        var commentBox = document.getElementById('commentBox');
+                        commentBox.innerHTML = '';
+                        comments.forEach(comment => {
+                            var newComment = document.createElement('div');
+                            newComment.className = 'commentcomment';
+                            newComment.innerHTML = `
+                                <img src="../../static/profilepic.png" class="commentpic">
+                                <div class="text-wrapper">
+                                    <h3>${comment.username}</h3>
+                                    <p>${comment.content}</p>
+                                    <small>작성일: ${new Date(comment.created_at).toLocaleString()}</small>
+                                </div>
+                            `;
+                            commentBox.appendChild(newComment);
+                        });
+                    });
+            }
+
+
+            // 페이지 로드 시 기존 댓글을 가져옴
+            window.onload = fetchComments;
+
+
+    let images = ["X.png", "image.png", "image3.jpg"]; //이거연동해야함
+    let currentIndex = 0;
+
+    function showImage(index) {
+    const imgElement = document.getElementById("current-image");
+    imgElement.src = images[index];
+    }
+
+    function prevImage() {
+    currentIndex = (currentIndex - 1 + images.length) % images.length;
+    showImage(currentIndex);
+    }
+
+    function nextImage() {
+    currentIndex = (currentIndex + 1) % images.length;
+    showImage(currentIndex);
+    }
+
+
+</script>
+</body>
+</html>

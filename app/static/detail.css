@@ -1,0 +1,395 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  font-family: Arial, sans-serif;
+}
+
+/* 사이드바 스타일 */
+.sidebar {
+/* Navigation Rail
+
+The rail is a side navigation component that displays three to seven app destinations and, optionally, a floating action button (FAB). Each destination is represented by an icon and label text.
+
+The rail can serve as the sole navigation component on larger screen sizes, such as desktops and tablets.
+
+🛠 Additional options
+Segments - Can be edited by selecting individual segments and  selecting states, labels, and badges from the variant properties. 
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 44px 0px 56px;
+position: fixed;
+gap: 40px;
+width: 72px;
+height: 956px;
+
+background: #0F124D;
+
+}
+
+.logo img {
+  width: 50px;
+  margin-bottom: 20px;
+  margin-left: 15px;
+  position: sticky;
+}
+
+.menu {
+  list-style-type: none;
+  padding: 0;
+  position: sticky;
+}
+
+.menu li {
+  margin: 20px 0;
+}
+
+.menu li a {
+  color: white;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 14px;
+}
+
+.icon {
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+.plus-button {
+  margin-top: auto;
+  background-color: #FFD8E4;
+  border: none;
+  border-radius: 35%;
+  width: 50px;
+  height: 50px;
+  font-size: 24px;
+  cursor: pointer;
+  margin-left: 15px;
+  padding: 20px;
+  color:#0F124D;
+}
+
+
+
+
+.imagebox{
+  /* image 1 */
+
+position: absolute;
+width: 563px;
+height: 760px;
+top: 144px;
+left: 150px;
+}
+
+.sim {
+width: 100%;
+height: 100%;
+object-fit: cover; /* 이미지가 슬라이더 크기에 맞도록 조정하며, 비율을 유지하면서 자를 수 있음 */
+}
+
+.imagebutton{
+  top: 920px;
+  position: absolute;
+  left: 400px;
+  background-color: #ffffff;
+  border: none;
+}
+
+
+
+.seller{
+
+  box-sizing: border-box;
+  
+  /* Auto layout */
+  display: flex;
+  flex-direction: row;
+  padding: 2%;    
+  position: absolute;
+  width: 533px;
+  height: 77px;
+  left: 765px;
+  top: 144px;
+  /* Colors/Blue */
+  background: #007AFF;
+  border-radius: 12px;
+  background: #FFFFFF;
+box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);    
+  
+    }
+
+    .profilepic{
+      /* Initial */
+
+position: absolute;
+width: 40px;
+height: 40px;
+left: 15px;
+top: calc(50% - 40px/2);
+border-radius: 100%;
+
+/* M3/title/medium */
+font-family: 'Roboto';
+font-style: normal;
+font-weight: 500;
+font-size: 16px;
+line-height: 24px;
+/* or 150% */
+display: flex;
+align-items: center;
+text-align: center;
+letter-spacing: 0.15px;
+
+color: #FEF7FF;
+
+
+    }
+.sellname{/* Text */
+position: absolute;
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+width: 360px;
+height: 48px;
+left: 830px;
+top: 160px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 1;
+    }
+
+    .sellm{
+/* Media */
+
+position: absolute;
+right: 0px;
+top: 0%;
+bottom: 0%;
+width: 77px;
+height: 77px;
+overflow: hidden;
+border-top-right-radius:12px;
+border-bottom-right-radius:12px;
+background: url(X.jpeg);
+
+
+    }
+
+
+
+  .sellingpost{
+      height: 200px;
+      padding:2%;
+  }
+
+  .buy{
+
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: 0px;
+gap: 8px;
+position: relative;
+width: 130px;
+height: 53px;
+left:320px;
+border:none;
+color:#FFFFFF;
+
+background: #B3261E;
+border-radius: 100px;
+
+  }
+
+
+.boxxx{
+/* Rectangle 24 */
+
+position: absolute;
+width: 533px;
+height: 594px;
+left: 765px;
+top: 242px;
+padding: 2%;
+
+background: #FFFFFF;
+box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+border-radius: 28px;
+z-index: 1; 
+
+}
+
+
+
+.divide{
+/* Horizontal/Inset
+
+Dividers are one way to visually group components and create hierarchy. They can also be used to imply nested parent/child relationships.
+
+Use inset dividers to separate related content within a section.
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: flex-start;
+padding: 0px 0px 0px 16px;
+
+position: relative;
+width: 490px;
+height: 22px;
+
+transform: matrix(1, 0, 0, -1, 0, 0);
+
+
+}
+
+
+.comment-box {
+/* Rectangle 23 */
+
+position: absolute;
+width: 461px;
+height: 158px;
+left: 35px;
+top: 410px;
+padding: 3%;
+background: #EBEDEF;
+border-radius: 12px;
+z-index: 2; 
+padding-left: 3%;
+
+
+max-height: 158px; /* 최대 높이를 설정 */
+overflow-y: auto; /* 세로 방향 스크롤을 추가 */
+
+
+
+
+}
+
+
+
+
+/* 스크롤바 숨기기 (WebKit 기반 브라우저: Chrome, Safari 등) */
+.comment-box::-webkit-scrollbar {
+display: none; /* 스크롤바를 숨깁니다. */
+}
+
+/* Firefox 스크롤바 숨기기 */
+.comment-box {
+scrollbar-width: none; /* Firefox에서 스크롤바를 숨깁니다. */
+}
+
+/* IE 및 Edge (Legacy)에서 스크롤바 숨기기 */
+.comment-box {
+-ms-overflow-style: none; /* IE 및 Edge에서 스크롤바를 숨깁니다. */
+}
+
+.commentcomment{
+  display: flex;
+  flex-direction: row; /* 가로(행) 방향으로 배치 */
+      align-items: flex-start; 
+      gap: 15px; /* 이미지와 텍스트 사이의 간격 */
+      margin-bottom: 5px;
+      border-bottom: solid #bbbbbb;
+      padding-top: 1%;
+      padding-bottom:2%;
+}
+
+.commentpic
+{
+  position: relative;
+width: 63px;
+height: 63px;
+overflow: hidden;
+border-radius: 100%;
+background: ../../static/profilepic.png;
+
+
+}
+
+
+.text-wrapper {
+  width: 340px;
+  display: flex;
+  flex-direction: column; /* 텍스트를 세로로 배치 */
+  line-height: 200%;
+}
+
+
+
+.comment-box textarea {
+  width: 100%;
+  height: 80px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.commentwrite{
+  /* Rectangle 2 */
+
+position: absolute;
+width: 433px;
+height: 68px;
+left: 774px;
+top: 874px;
+
+background: #FFFFFF;
+box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.25);
+border-radius: 12px;
+resize: none;
+
+border: none;
+outline: none;
+background-color: transparent;
+padding:1%;
+}
+
+.writebutton{
+  /* FAB
+
+Floating action buttons (FABs) help people take primary actions on a screen. The FAB appears in front of all other content on screen, and is recognizable for its rounded shape and icon in the center.
+
+Enabled primary FAB 
+*/
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: center;
+align-items: center;
+padding: 0px;
+
+position: relative;
+width: 75px;
+height: 70px;
+left: 1215px;
+top: 874px;
+
+background: #F65757;
+/* M3/Elevation Light/3 */
+box-shadow: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
+border-radius: 16px;
+border:none;
+
+}
