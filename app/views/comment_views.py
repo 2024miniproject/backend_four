@@ -14,8 +14,13 @@ bp = Blueprint('comment', __name__, url_prefix='/')
 def detail(post_id):
     post = Post.query.get_or_404(post_id)  # 주어진 post_id에 해당하는 게시글 가져오기
     comments = Comment.query.filter_by(post_id=post_id).all()  # 댓글 가져오기
-    return render_template('front/detail.html', post=post, comments=comments)  # 게시글 데이터와 댓글을 템플릿에 전달
+    current_time = datetime.now()  # 현재 시간 가져오기
+    #가장 최근 댓글 시간 계산
+    recent_comment_time = None
+    if comments:
+        recent_comment_time = max(comment.created_at for comment in comments)
 
+    return render_template('front/detail.html', post=post, comments=comments,recent_comment_time=recent_comment_time,current_time=current_time)  # 게시글 데이터와 댓글을 템플릿에 전달
 
 @bp.route('/add_comment', methods=['POST'])  # 댓글 추가 엔드포인트
 def add_comment():

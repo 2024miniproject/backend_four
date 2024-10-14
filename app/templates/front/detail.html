@@ -49,7 +49,22 @@
 </div>
 <div class="sellname">
     <h3>익명의 뽀삐</h3>
-    <p>최근 답장 - n 시간 전</p>
+    {% if comments %}
+        {% set sorted_comments = comments | sort(attribute='created_at', reverse=true) %}
+        {% set latest_comment = sorted_comments[0] %}
+        {% set time_diff = current_time - latest_comment.created_at %}
+        {% if time_diff.days > 0 %}
+            <p>최근 댓글 - {{ time_diff.days }}일 전</p>
+        {% elif time_diff.seconds >= 3600 %}
+            <p>최근 댓글 - {{ time_diff.seconds // 3600 }}시간 전</p>
+        {% elif time_diff.seconds >= 60 %}
+            <p>최근 댓글 - {{ time_diff.seconds // 60 }}분 전</p>
+        {% else %}
+            <p>최근 댓글 - 방금 전</p>
+        {% endif %}
+    {% else %}
+        <p>최근 댓글이 없습니다</p>
+    {% endif %}
 </div>
 <div class="boxxx">
     <h2>{{ post.title }}</h2> <!-- 게시글 제목 -->
