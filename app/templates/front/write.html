@@ -46,7 +46,7 @@
             <label class="upload-box" for="file-upload">
                 <span class="upload-icon">+</span>
             </label>
-            <input id="file-upload" type="file" name="files" accept="image/*" onchange="handleFile(event)" style="display: none;" multiple>
+
             <!-- 이미지 미리보기 영역 -->
             <div id="image-container"></div>
             <div id="rectangle-container"></div>
@@ -56,13 +56,15 @@
 
             <!-- 발행하기 버튼 -->
             <button class="publish-button" type="button" onclick="publishContent()">발행하기</button>
+            <input type="hidden" id="uploaded-files" name="image_filename"> <!-- 파일 경로 저장용 -->
+            <input id="file-upload" type="file" name="files" accept="image/*" onchange="handleFile(event)" style="display: none;" multiple>
         </form>
     </div>
 
     <script>
         function handleFile(event) {
+            uploadFiles(event);
             const output = document.getElementById('image-container');
-
 
             Array.from(event.target.files).forEach(file => {
                 const reader = new FileReader();
@@ -78,6 +80,39 @@
                 reader.readAsDataURL(file);  // 각 파일을 Data URL로 읽어오기
             });
         }
+
+async function uploadFiles(event) {
+    const files = event.target.files;
+    const formData = new FormData();
+
+    for (let i = 0; i < files.length; i++) {
+        formData.append('files', files[i]);
+    }
+
+    try {
+        const response = await fetch('/write/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        if (result.success) {
+            const uploadedFilesInput = document.getElementById('uploaded-files');
+            let currentFiles = new Set(uploadedFilesInput.value ? uploadedFilesInput.value.split(',') : []);
+            // 새로운 파일명을 Set에 추가해 중복 방지
+            result.filenames.forEach(filename => currentFiles.add(filename));
+            uploadedFilesInput.value = Array.from(currentFiles).join(',');
+        } else {
+            alert("파일 업로드 실패: " + result.message);
+        }
+    } catch (error) {
+        alert("파일 업로드 중 오류 발생: " + error.message);
+    }
+}
+
+
+
+write.html
 
     async function publishContent() {
         const form = document.querySelector('#write-form');

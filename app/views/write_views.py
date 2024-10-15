@@ -24,7 +24,9 @@ def write():
         content = request.form['content']
         user_id = session.get('user_id')
         image_filenames = request.form.getlist('image_filename')  # HTML에서 업로드된 파일명을 받아옵니다.
-
+        print("-----------------------------------------Image Filenames:", image_filenames)
+        print(type(image_filenames))
+        print("-----------------------------------------title: ", title)
         if not user_id:
             return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
 
@@ -35,11 +37,12 @@ def write():
                 price=price,
                 content=content,
                 filename=filenames_str,
-                image_filename=filenames_str,  # 파일 경로 포함
+                image_filename=filenames_str,  # 이미지 경로들을 데이터베이스에 저장
                 user_id=user_id
             )
             db.session.add(new_post)
             db.session.commit()
+            print("-----------------------------------------Image Filenames:", image_filenames)
 
             new_sell = Sell(
                 item_name=title,
