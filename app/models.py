@@ -26,6 +26,7 @@ class Post(db.Model):
     filename = db.Column(db.String(200))
     image_filename = db.Column(db.Text, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
     def __init__(self, title, price, content, filename, image_filename=None, user_id=None):
