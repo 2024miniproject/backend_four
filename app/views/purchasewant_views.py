@@ -89,6 +89,36 @@ def submit_purchase():
         return jsonify({'success': False, 'message': '구매 신청 중 오류가 발생했습니다.'})
 
 
+
+@bp.route('/cancel_purchase/<int:purchase_id>', methods=['POST'])
+def cancel_purchase(purchase_id):
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"success": False, "message": "로그인이 필요합니다."}), 401
+
+    # 구매 기록을 가져오고 사용자 확인
+    purchase = Buy.query.get(purchase_id)
+    if not purchase:
+        return jsonify({"success": False, "message": "구매 기록을 찾을 수 없습니다."}), 404
+
+    # 구매자가 본인 소유인지 확인
+    if purchase.user_id != user_id:
+        return jsonify({"success": False, "message": "취소 권한이 없습니다."}), 403
+
+    try:
+        db.session.delete(purchase)
+        db.session.commit()
+        return jsonify({"success": True, "message": "구매 신청이 취소되었습니다."})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"success": False, "message": "취소 중 오류가 발생했습니다."}), 500
+
+
+
+
+
+
+
 @bp.route('/update_purchase_status/<int:purchase_id>', methods=['POST'])
 def update_purchase_status(purchase_id):
     user_id = session.get('user_id')
@@ -129,3 +159,6 @@ def update_purchase_status(purchase_id):
         db.session.rollback()
         print(f"Error: {e}")
         return jsonify({"success": False, "message": "상태 업데이트 중 오류가 발생했습니다."})
+
+
+
