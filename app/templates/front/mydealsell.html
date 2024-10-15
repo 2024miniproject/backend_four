@@ -63,7 +63,7 @@
         {% for sale in sales %}
         <div class="product-section">
             <div class="aboutabout">
-                <h4>{{ sale.item_name }}</h4>
+                <h4><a href="{{ url_for('detail.detail', post_id=sale.id) }}">{{ sale.item_name }}</a></h4>
                 <p>{{ sale.description }}</p>
                 <p>상태: {{ sale.status.value }}</p>
             </div>
