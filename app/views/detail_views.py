@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, session, flash
-from app.models import Post
+from app.models import Post, Comment, Sell
 from app import db
 from flask import Blueprint, render_template, redirect, url_for, session, flash, jsonify  # jsonify 추가
 
@@ -23,6 +23,8 @@ def delete_post(post_id):
         return '', 403  # 삭제 권한이 없을 경우 403 Forbidden 응답
 
     try:
+        # 관련된 판매 정보 삭제
+        Sell.query.filter_by(post_id=post_id).delete()  # post_id와 연결된 판매 항목 삭제
         # 게시글 삭제
         db.session.delete(post)
         db.session.commit()
