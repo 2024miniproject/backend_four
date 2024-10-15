@@ -10,6 +10,7 @@ bp = Blueprint('detail', __name__, url_prefix='/')
 @bp.route('/detail/<int:post_id>')
 def detail(post_id):
     post = Post.query.get_or_404(post_id)
+    print("-----------------------------------------Image Filenames:", post.image_filename)
     return render_template('front/detail.html', post=post)
 
 

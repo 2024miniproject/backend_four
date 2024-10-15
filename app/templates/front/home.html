@@ -46,13 +46,14 @@
         <div class="postbox">
             <div class="posts">
                 {% for post in posts %}
-                <div class="post" onclick="location.href='{{ url_for('detail.detail', post_id=post.id) }}'">
-                    {% if post.image_filename %}
-                        <img src="{{ url_for('static', filename=post.image_filename) }}" alt="Uploaded Image" class="post-image">
-                    {% endif %}
-                    <h3 class="post-title">{{ post.title }}</h3>
-                    <h5 class="post-price">{{ post.price|int }}원</h5>
-                </div>
+                    <div class="post" onclick="location.href='{{ url_for('detail.detail', post_id=post.id) }}'">
+
+                        {% if post.image_filename %}
+                            <img src="{{ url_for('static', filename= 'uploads/' + post.image_filename.split(',')[0].strip()) }}" alt="Uploaded Image" class="post-image">
+                        {% endif %}
+                        <h3 class="post-title">{{ post.title }}</h3>
+                        <h5 class="post-price">{{ post.price|int }}원</h5>
+                    </div>
                 {% endfor %}
             </div>
         </div>

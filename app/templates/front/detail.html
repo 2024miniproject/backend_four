@@ -44,10 +44,7 @@
 </div>
 
 <div class="imagebox">
-    {% if post.image_filename %}
-    <img class="sim" id="current-image" src="{{ url_for('static', filename=post.image_filename) }}" alt="Uploaded Image"
-         style="max-width: 100%; height: auto;">
-    {% endif %}
+    <img class="sim" id="current-image" src="" alt="Uploaded Image" style="max-width: 100%; height: auto;">
 </div>
 
 <div class="imagebutton">
@@ -55,10 +52,10 @@
     <button style="border:none; background-color:#ffffff;" onclick="nextImage()">→</button>
 </div>
 
-<div class="seller">
-    <img class="profilepic" src="../../static/profilepic.png">
-    <img class="sellm" src="X.jpeg">
-</div>
+    <div class="seller">
+        <img class="profilepic" src="../../static/profilepic.png">
+
+    </div>
 <div class="sellname">
     <h3>익명의 뽀삐</h3>
     {% if comments %}
@@ -136,6 +133,34 @@
 
 
 <script>
+
+    let images = {{ post.image_filename.split(',') | tojson }};
+    let currentIndex = 0;
+
+
+
+    function showImage(index) {
+        const imgElement = document.getElementById("current-image");
+        const imagePath = "{{ url_for('static', filename='uploads/') }}" + images[index].trim();
+        imgElement.src = imagePath;
+        console.log("Displaying image:", imagePath);  // 이미지 전환을 확인하는 로그 추가
+    }
+
+    function prevImage() {
+        currentIndex = (currentIndex - 1 + images.length) % images.length;
+        showImage(currentIndex);
+    }
+
+    function nextImage() {
+        currentIndex = (currentIndex + 1) % images.length;
+        showImage(currentIndex);
+    }
+
+    // 초기 이미지 설정
+    window.onload = function() {
+        showImage(currentIndex);
+        fetchComments();  // 댓글도 로드
+    };
 
 
     function submitPurchase() {
@@ -217,27 +242,9 @@
             }
 
 
-            // 페이지 로드 시 기존 댓글을 가져옴
-            window.onload = fetchComments;
 
 
-    let images = ["X.png", "image.png", "image3.jpg"]; //이거연동해야함
-    let currentIndex = 0;
 
-    function showImage(index) {
-    const imgElement = document.getElementById("current-image");
-    imgElement.src = images[index];
-    }
-
-    function prevImage() {
-    currentIndex = (currentIndex - 1 + images.length) % images.length;
-    showImage(currentIndex);
-    }
-
-    function nextImage() {
-    currentIndex = (currentIndex + 1) % images.length;
-    showImage(currentIndex);
-    }
 
     // 삭제 확인 및 요청 처리
     function deletePost() {
