@@ -10,23 +10,67 @@
         .hidden {
             display: none;
         }
+        .disabled-btn {
+            background-color: gray;
+            cursor: not-allowed;
+        }
     </style>
     <script>
-        function markDepositComplete() {
-            document.getElementById('step2').style.color = 'black'; // 검정색으로 변경
-            alert("입금 완료가 확인되었습니다.");
+        function updateStatus(purchaseId, currentStatus) {
+            let newStatus;
+            let nextButtonText;
 
-            const depositButton = document.getElementById('depositButton');
-            depositButton.style.backgroundColor = 'gray';
-            depositButton.disabled = true;
+            // 상태에 따라 다음 상태와 버튼 텍스트 설정
+            switch (currentStatus) {
+                case 'PENDING':
+                    newStatus = 'PAYMENT_COMPLETED';
+                    nextButtonText = '사물함 크기 선택 완료';
+                    break;
+                case 'PAYMENT_COMPLETED':
+                    newStatus = 'SIZE_SELECTED';
+                    nextButtonText = '사물함 배치 완료';
+                    break;
+                case 'SIZE_SELECTED':
+                    newStatus = 'LOCKER_ASSIGNED';
+                    nextButtonText = '수령 완료';
+                    break;
+                case 'LOCKER_ASSIGNED':
+                    newStatus = 'TRANSACTION_COMPLETED';
+                    nextButtonText = '거래 완료';
+                    break;
+                default:
+                    return;
+            }
+
+            // 상태 업데이트 요청
+            fetch(`/purchasewant/update_purchase_status/${purchaseId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({status: newStatus})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 버튼 업데이트
+                    const actionButton = document.getElementById(`actionButton-${purchaseId}`);
+                    actionButton.textContent = nextButtonText;
+                    actionButton.setAttribute("onclick", `updateStatus('${purchaseId}', '${newStatus}')`);
+                    if (newStatus === 'TRANSACTION_COMPLETED') {
+                        actionButton.classList.add('disabled-btn');
+                        actionButton.disabled = true;
+                    }
+                } else {
+                    alert(data.message);
+                }
+            });
         }
 
         function toggleProgressBar(purchaseId) {
             const progressBar = document.getElementById(`progressBar-${purchaseId}`);
             progressBar.classList.toggle('hidden');
         }
-
-
     </script>
 </head>
 
@@ -68,10 +112,22 @@
                 <div class="aboutabout">
                     <h4><a href="{{ url_for('detail.detail', post_id=purchase.id) }}">{{ purchase.item_name }}</a></h4>
                     <p>{{ purchase.description }}</p>
-                    <p>상태: {{ purchase.status.value }}</p>
+                    <p>상태: {{ purchase.status }}</p>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <button class="status-btn" id="depositButton" onclick="markDepositComplete()">입금 완료</button>
+                    <!-- 상태에 따른 버튼 텍스트 설정 -->
+ <!-- 예: mydealsell.html -->
+                    <button id="actionButton-{{ purchase.id }}"
+                        class="status-btn {% if purchase.status in ['TRANSACTION_COMPLETED', 'PAYMENT_COMPLETED', 'SIZE_SELECTED', 'LOCKER_ASSIGNED'] %}disabled-btn{% endif %}"
+                        onclick="updateStatus('{{ purchase.id }}', '{{ purchase.status }}')"
+                        {% if purchase.status in ['TRANSACTION_COMPLETED', 'PAYMENT_COMPLETED', 'SIZE_SELECTED', 'LOCKER_ASSIGNED'] %}disabled{% endif %}>
+                        {% if purchase.status == 'PENDING' %}입금 완료
+                        {% elif purchase.status == 'PAYMENT_COMPLETED' %}사물함 크기 선택 완료
+                        {% elif purchase.status == 'SIZE_SELECTED' %}사물함 배치 완료
+                        {% elif purchase.status == 'LOCKER_ASSIGNED' %}수령 완료
+                        {% else %}거래 완료{% endif %}
+                    </button>
+
                     <button class="status-btn2" onclick="toggleProgressBar('{{ purchase.id }}')">현황 조회</button>
                 </div>
 
@@ -99,8 +155,6 @@
         <p>구매 목록이 없습니다.</p>
         {% endif %}
 
-
     <script src="{{ url_for('static', filename='mydeal.js') }}"></script>
 </body>
 </html>
-

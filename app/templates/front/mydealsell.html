@@ -13,17 +13,71 @@
             border-bottom: 1px solid #ccc;
             padding-bottom: 10px;
         }
+        .disabled-btn {
+            background-color: gray;
+            cursor: not-allowed;
+        }
     </style>
     <script>
-        function showSizeSelection() {
-            const size = prompt("사물함 사이즈를 선택해주세요 (중/소):");
-            const statusButton = document.getElementById('statusButton');
-            if (size === '중' || size === '소') {
-                alert(`${size}칸이 배정되었습니다! xx.xx까지 판매 상품을 넣어주세요`);
-                statusButton.style.backgroundColor = 'gray';
-            } else {
-                alert("잘못된 입력입니다.");
+        function updateStatus(saleId, currentStatus) {
+            let newStatus;
+            let nextButtonText;
+
+            let disableButton = false; // 버튼 비활성화 여부를 저장하는 변수
+
+           // 상태에 따라 다음 상태와 버튼 텍스트, 버튼 활성화 여부 설정
+            switch (currentStatus) {
+                case 'PENDING':
+                    newStatus = 'PAYMENT_COMPLETED';
+                    nextButtonText = '사물함 크기 선택 완료';
+                    disableButton = true; // 구매자가 다음 상태를 완료할 때까지 버튼 비활성화
+                    break;
+                case 'PAYMENT_COMPLETED':
+                    newStatus = 'SIZE_SELECTED';
+                    nextButtonText = '사물함 배치 완료';
+                    disableButton = true; // 구매자가 사물함 배치 완료할 때까지 비활성화
+                    break;
+                case 'SIZE_SELECTED':
+                    newStatus = 'LOCKER_ASSIGNED';
+                    nextButtonText = '수령 완료';
+                    disableButton = true; // 구매자가 수령 완료할 때까지 비활성화
+                    break;
+                case 'LOCKER_ASSIGNED':
+                    newStatus = 'TRANSACTION_COMPLETED';
+                    nextButtonText = '거래 완료';
+                    break;
+                default:
+                    return;
             }
+
+            // 상태 업데이트 요청
+            fetch(`/purchasewant/update_purchase_status/${saleId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({status: newStatus})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 버튼 업데이트
+                    const actionButton = document.getElementById(`statusButton-${saleId}`);
+                    actionButton.textContent = nextButtonText;
+                    actionButton.setAttribute("onclick", `updateStatus('${saleId}', '${newStatus}')`);
+                    if (newStatus === 'TRANSACTION_COMPLETED') {
+                        actionButton.classList.add('disabled-btn');
+                        actionButton.disabled = true;
+                    }
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        function toggleProgressBar(saleId) {
+            const progressBar = document.getElementById(`progressBar-${saleId}`);
+            progressBar.classList.toggle('hidden');
         }
     </script>
 </head>
@@ -44,6 +98,7 @@
             </form>
         </ul>
     </div>
+
     <!-- 메인 콘텐츠 -->
     <div class="content">
         <!-- 사용자 정보 -->
@@ -58,44 +113,52 @@
             </div>
         </div>
 
-    <!-- 판매 목록 -->
-    <div class="purchase-list">
-        {% for sale in sales %}
-        <div class="product-section">
-            <div class="aboutabout">
-                <h4><a href="{{ url_for('detail.detail', post_id=sale.id) }}">{{ sale.item_name }}</a></h4>
-                <p>{{ sale.description }}</p>
-                <p>상태: {{ sale.status.value }}</p>
-            </div>
-            <div style="display: flex; gap: 10px;">
-                <button class="status-btn" id="statusButton" onclick="showSizeSelection()">판매 수락</button>
-                <button class="status-btn2" onclick="toggleProgressBar('{{ sale.id }}')">현황 조회</button>
-            </div>
+        <!-- 판매 목록 -->
+        <div class="purchase-list">
+            {% for sale in sales %}
+            <div class="product-section">
+                <div class="aboutabout">
+                    <h4><a href="{{ url_for('detail.detail', post_id=sale.id) }}">{{ sale.item_name }}</a></h4>
+                    <p>{{ sale.description }}</p>
+                    <p>상태: {{ sale.status }}</p>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                   <button id="actionButton-{{ sale.id }}"
+                        class="status-btn {% if sale.status in ['TRANSACTION_COMPLETED', 'PAYMENT_COMPLETED', 'SIZE_SELECTED', 'LOCKER_ASSIGNED'] %}disabled-btn{% endif %}"
+                        onclick="updateStatus('{{ sale.id }}', '{{ sale.status }}')"
+                        {% if sale.status in ['TRANSACTION_COMPLETED', 'PAYMENT_COMPLETED', 'SIZE_SELECTED', 'LOCKER_ASSIGNED'] %}disabled{% endif %}>
+                        {% if sale.status == 'PENDING' %}입금 완료
+                        {% elif sale.status == 'PAYMENT_COMPLETED' %}사물함 크기 선택 완료
+                        {% elif sale.status == 'SIZE_SELECTED' %}사물함 배치 완료
+                        {% elif sale.status == 'LOCKER_ASSIGNED' %}수령 완료
+                        {% else %}거래 완료{% endif %}
+                    </button>
+                    <button class="status-btn2" onclick="toggleProgressBar('{{ sale.id }}')">현황 조회</button>
+                </div>
 
-            <!-- 상태 진행 바 -->
-            <div class="progress-bar hidden" id="progressBar-{{ sale.id }}">
-                <div class="step" {% if sale.status in ['PAYMENT_COMPLETED', 'SIZE_SELECTED', 'LOCKER_ASSIGNED', 'TRANSACTION_COMPLETED'] %} style="color: black;" {% endif %}>
-                    <p>거래 대기 중</p>
-                </div>
-                <div class="step" {% if sale.status in ['SIZE_SELECTED', 'LOCKER_ASSIGNED', 'TRANSACTION_COMPLETED'] %} style="color: black;" {% endif %}>
-                    <p>입금 완료</p>
-                </div>
-                <div class="step" {% if sale.status in ['LOCKER_ASSIGNED', 'TRANSACTION_COMPLETED'] %} style="color: black;" {% endif %}>
-                    <p>사물함 크기 선택 완료</p>
-                </div>
-                <div class="step" {% if sale.status == 'TRANSACTION_COMPLETED' %} style="color: black;" {% endif %}>
-                    <p>사물함 배치 완료</p>
-                </div>
-                <div class="step" {% if sale.status == 'TRANSACTION_COMPLETED' %} style="color: black;" {% endif %}>
-                    <p>수령 완료</p>
+                <!-- 상태 진행 바 -->
+                <div class="progress-bar hidden" id="progressBar-{{ sale.id }}">
+                    <div class="step" {% if sale.status in ['PAYMENT_COMPLETED', 'SIZE_SELECTED', 'LOCKER_ASSIGNED', 'TRANSACTION_COMPLETED'] %} style="color: black;" {% endif %}>
+                        <p>거래 대기 중</p>
+                    </div>
+                    <div class="step" {% if sale.status in ['SIZE_SELECTED', 'LOCKER_ASSIGNED', 'TRANSACTION_COMPLETED'] %} style="color: black;" {% endif %}>
+                        <p>입금 완료</p>
+                    </div>
+                    <div class="step" {% if sale.status in ['LOCKER_ASSIGNED', 'TRANSACTION_COMPLETED'] %} style="color: black;" {% endif %}>
+                        <p>사물함 크기 선택 완료</p>
+                    </div>
+                    <div class="step" {% if sale.status == 'TRANSACTION_COMPLETED' %} style="color: black;" {% endif %}>
+                        <p>사물함 배치 완료</p>
+                    </div>
+                    <div class="step" {% if sale.status == 'TRANSACTION_COMPLETED' %} style="color: black;" {% endif %}>
+                        <p>수령 완료</p>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
-</div>
 
-<script src="{{ url_for('static', filename='mydeal.js') }}"></script>
+    <script src="{{ url_for('static', filename='mydeal.js') }}"></script>
 </body>
 </html>
-
