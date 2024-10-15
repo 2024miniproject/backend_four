@@ -27,6 +27,12 @@ def mydealsell():
         return redirect(url_for('auth_views.login'))
     sale_list = Sell.query.filter_by(user_id=user_id).all()
 
+    # 판매 항목의 상태가 잘못된 경우 PENDING으로 초기화
+    for sale in sale_list:
+        if sale.status not in ['PENDING', 'PAYMENT_COMPLETED', 'SIZE_SELECTED', 'LOCKER_ASSIGNED', 'TRANSACTION_COMPLETED']:
+            sale.status = 'PENDING'
+    db.session.commit()
+
     return render_template('front/mydealsell.html', sales=sale_list)
 
 

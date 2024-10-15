@@ -87,7 +87,11 @@
 
     <!-- 구매 신청하기 버튼 -->
     {% if post.user_id != session.get('user_id') %}
-    <button class="buy" onclick="submitPurchase()">구매 신청하기</button>
+        {% if existing_purchase %}
+            <button class="buy" onclick="window.location.href='/mydeal_views/mydealbuy'">구매 현황 보기</button>
+        {% else %}
+            <button class="buy" onclick="submitPurchase()">구매 신청하기</button>
+        {% endif %}
     {% else %}
     <!-- 판매 목록 가기 버튼: 작성자일 때 표시 -->
         <button class="buy" onclick="window.location.href='/mydeal_views/mydealsell'">판매 목록 가기</button>
